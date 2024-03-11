@@ -33,10 +33,16 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures {
+        dataBinding = true
+    }
 }
 
 dependencies {
     val room_version = "2.6.1"
+    val retrofit_version = "2.9.0"
+    val gson_version = "2.8.8"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -49,4 +55,9 @@ dependencies {
     // room
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
+
+    // network & serialization
+    implementation("com.google.code.gson:gson:$gson_version")
+    implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
+    implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
 }
