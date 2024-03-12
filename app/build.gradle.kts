@@ -60,4 +60,6 @@ dependencies {
     implementation("com.google.code.gson:gson:$gson_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
+
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
 }
