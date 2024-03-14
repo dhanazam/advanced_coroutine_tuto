@@ -62,4 +62,9 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+
+    implementation("androidx.fragment:fragment-ktx:$1.6.2")
+
+    implementation("androidx.activity:activity-ktx:$1.8.2")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
 }
