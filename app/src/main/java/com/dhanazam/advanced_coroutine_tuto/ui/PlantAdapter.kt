@@ -8,16 +8,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dhanazam.advanced_coroutine_tuto.Plant
 import com.dhanazam.advanced_coroutine_tuto.databinding.ListItemPlantBinding
 
-class PlantAdapter : ListAdapter<Plant, RecyclerView.ViewHolder>(PlantDiffCallback()){
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        return PlantViewHolder(ListItemPlantBinding.inflate(
-            LayoutInflater.from(parent.context), parent, false
-        ))
-    }
+class PlantAdapter : ListAdapter<Plant, RecyclerView.ViewHolder>(PlantDiffCallback()) {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val plant = getItem(position)
         (holder as PlantViewHolder).bind(plant)
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return PlantViewHolder(
+            ListItemPlantBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
     }
 
     class PlantViewHolder(
@@ -34,6 +35,7 @@ class PlantAdapter : ListAdapter<Plant, RecyclerView.ViewHolder>(PlantDiffCallba
 }
 
 private class PlantDiffCallback : DiffUtil.ItemCallback<Plant>() {
+
     override fun areItemsTheSame(oldItem: Plant, newItem: Plant): Boolean {
         return oldItem.plantId == newItem.plantId
     }

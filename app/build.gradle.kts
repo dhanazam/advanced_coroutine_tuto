@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -55,6 +56,8 @@ dependencies {
     // room
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
 
     // network & serialization
     implementation("com.google.code.gson:gson:$gson_version")
@@ -67,4 +70,7 @@ dependencies {
 
     implementation("androidx.activity:activity-ktx:$1.8.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+
+    // Glide
+    implementation("com.github.bumptech.glide:glide:4.13.0")
 }
