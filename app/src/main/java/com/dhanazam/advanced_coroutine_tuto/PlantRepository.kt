@@ -1,7 +1,15 @@
 package com.dhanazam.advanced_coroutine_tuto
 
+import androidx.annotation.AnyThread
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.map
+import androidx.lifecycle.switchMap
+import com.dhanazam.advanced_coroutine_tuto.utils.CacheOnSuccess
+import com.dhanazam.advanced_coroutine_tuto.utils.ComparablePair
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class PlantRepository constructor(
     private val plantDao: PlantDao,
@@ -9,10 +17,49 @@ class PlantRepository constructor(
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default
 ) {
 
-    val plants = plantDao.getPlants()
+    private var plantsListSortOrderCache = CacheOnSuccess(onErrorFallback = { listOf<String>() }) {
+        plantService.customPlantSortOrder()
+    }
+
+    val plants: LiveData<List<Plant>> = liveData<List<Plant>> {
+        val plantsLiveData = plantDao.getPlants()
+        val customSortOrder = plantsListSortOrderCache.getOrAwait()
+        emitSource(plantsLiveData.map { plantList ->
+            plantList.applySort(customSortOrder)
+        })
+    }
+
+    //fun getPlantsWithGrowZone(growZone: GrowZone) = liveData {
+//        val plantsGrowZoneLiveData = plantDao.getPlantsWithGrowZoneNumber(growZone.number)
+//        val customSortOrder = plantsListSortOrderCache.getOrAwait()
+//        emitSource(plantsGrowZoneLiveData.map { plantList ->
+//            plantList.applySort(customSortOrder)
+//        })
+//    }
 
     fun getPlantsWithGrowZone(growZone: GrowZone) =
         plantDao.getPlantsWithGrowZoneNumber(growZone.number)
+            .switchMap { plantList ->
+                liveData {
+                    val customSortOrder = plantsListSortOrderCache.getOrAwait()
+                    emit(plantList.applyMainSafeSort(customSortOrder))
+                }
+            }
+
+    private fun List<Plant>.applySort(customSortOrder: List<String>): List<Plant> {
+        return sortedBy { plant ->
+            val positionForItem = customSortOrder.indexOf(plant.plantId).let { order ->
+                if (order > -1) order else Int.MAX_VALUE
+            }
+            ComparablePair(positionForItem, plant.name)
+        }
+    }
+
+    @AnyThread
+    private suspend fun List<Plant>.applyMainSafeSort(customSortOrder: List<String>) =
+        withContext(defaultDispatcher) {
+            this@applyMainSafeSort.applySort(customSortOrder)
+        }
 
     private fun shouldUpdatePlantsCache(): Boolean {
         return true
