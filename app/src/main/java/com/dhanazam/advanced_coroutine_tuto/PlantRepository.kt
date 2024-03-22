@@ -9,6 +9,11 @@ import com.dhanazam.advanced_coroutine_tuto.utils.CacheOnSuccess
 import com.dhanazam.advanced_coroutine_tuto.utils.ComparablePair
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
 
 class PlantRepository constructor(
@@ -28,6 +33,25 @@ class PlantRepository constructor(
             plantList.applySort(customSortOrder)
         })
     }
+
+    val plantsFlow: Flow<List<Plant>>
+        get() = plantDao.getPlantsFlow()
+            .combine(customSortFlow) { plants, sortOrder ->
+                plants.applySort(sortOrder)
+            }
+
+    fun getPlantsWithGrowZoneFlow(growZoneNumber: GrowZone): Flow<List<Plant>> {
+        return plantDao.getPlantsWithGrowZoneNumberFlow(growZoneNumber.number)
+    }
+
+//    private val customSortFlow = plantsListSortOrderCache::getOrAwait.asFlow()
+
+    // Create a flow that calls a single function
+    private val customSortFlow = plantsListSortOrderCache::getOrAwait.asFlow()
+        .onStart {
+            emit(listOf())
+            delay(1500)
+        }
 
     //fun getPlantsWithGrowZone(growZone: GrowZone) = liveData {
 //        val plantsGrowZoneLiveData = plantDao.getPlantsWithGrowZoneNumber(growZone.number)

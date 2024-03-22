@@ -1,8 +1,10 @@
 package com.dhanazam.advanced_coroutine_tuto
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import com.dhanazam.advanced_coroutine_tuto.GrowZone
 import com.dhanazam.advanced_coroutine_tuto.NoGrowZone
@@ -29,6 +31,7 @@ class PlantListViewModel internal constructor(
     private val growZone = MutableLiveData<GrowZone>(NoGrowZone)
 
     val plants: LiveData<List<Plant>> = growZone.switchMap { growZone ->
+        Log.d("growZone", growZone.toString() + " " + NoGrowZone.toString())
         if (growZone == NoGrowZone) {
             plantRepository.plants
         } else {
@@ -36,8 +39,13 @@ class PlantListViewModel internal constructor(
         }
     }
 
+    val plantsUsingFlow: LiveData<List<Plant>> = plantRepository.plantsFlow.asLiveData()
+
     init {
         clearGrowZoneNumber()
+
+        // fetch the full plant list
+        launchDataLoad { plantRepository.tryUpdateRecentPlantsCache() }
     }
 
     fun setGrowZoneNumber(num: Int) {
